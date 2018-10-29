@@ -1,0 +1,14 @@
+- name: Pull heapster image
+  docker_image:
+    name: "{{ heapster_registry }}/heapster-amd64"
+    tag: v{{ heapster_version }}
+- name: Copy heapster manifest
+  template:
+    src: heapster.yml.j2
+    dest: /etc/kubernetes/heapster.yml
+- name: Apply heapster deployment
+  command: kubectl apply -f /etc/kubernetes/heapster.yml
+  environment:
+    KUBECONFIG: "{{ kube_kubelet_config }}"
+  register: apply_result
+  changed_when: apply_result.stdout is search("configured|created")
